@@ -128,9 +128,9 @@ Unlike single-model chatbots, MedHive coordinates **10 specialized AI agents** �
 │                              ▼                              │
 │  ┌───────────────────────────────────────────────────────┐  │
 │  │                      Agent Pool                       │  │
-│  │  🧠 Medical      🚨 Emergency    📊 Risk Assessment   │  │
-│  │  🔍 Web Search   💊 Drug Inter.  🧬 Lab Report        │  │
-│  │  ✅ Verification 📝 Summary      💪 Coach  🩺 Symptom  │  │
+│  │  🧠 Medical      🚨 Emergency    📊 Risk Assessment  │  │
+│  │  🔍 Web Search   💊 Drug Inter.  🧬 Lab Report       │  │
+│  │  ✅ Verification 📝 Summary      💪 Coach 🩺Symptom │  │
 │  └───────────────────────────────────────────────────────┘  │
 │                              │                              │
 │                              ▼                              │
