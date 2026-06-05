@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 
-from schemas.request import AnalyzeRequest
+from schemas.analyze import AnalyzeRequest
 from workflows.healthcare_coordinator import HealthcareCoordinator
 
 router = APIRouter()
@@ -9,10 +9,11 @@ coordinator = HealthcareCoordinator()
 
 
 @router.post("/analyze")
-async def analyze_health(data: AnalyzeRequest):
+async def analyze(request: AnalyzeRequest):
 
     result = await coordinator.analyze(
-        data.message
+        user_input=request.message,
+        patient_id=request.patient_id
     )
 
     return result

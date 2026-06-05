@@ -1,0 +1,334 @@
+"use client"
+
+import * as React from "react"
+import { Sidebar, MobileBottomNav } from "@/components/Sidebar"
+import { Card } from "@/components/ui/card"
+import { motion, AnimatePresence } from "framer-motion"
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: { opacity: 1, transition: { staggerChildren: 0.07, delayChildren: 0.1 } },
+}
+const cardVariants = {
+  hidden: { y: 20, opacity: 0 },
+  visible: { y: 0, opacity: 1, transition: { type: "spring" as const, stiffness: 120, damping: 18 } },
+}
+
+const timelineEvents = [
+  {
+    id: 1,
+    date: "2026-06-05",
+    title: "Lab Report Upload: Complete Blood Count",
+    category: "lab",
+    icon: "water_drop",
+    color: "text-primary",
+    bg: "bg-primary/10",
+    border: "border-primary/20",
+    description: "Analyzed your blood parameters. All oxygen-transporting red cells, immune system markers, and platelets are in optimal balance.",
+    source: "Quest Diagnostics Sync",
+    severity: "normal",
+    tags: ["CBC", "Lab Panel", "Biomarkers"],
+  },
+  {
+    id: 2,
+    date: "2026-06-03",
+    title: "Symptom Assessment: Intermittent Fatigue",
+    category: "symptom",
+    icon: "healing",
+    color: "text-amber-600",
+    bg: "bg-amber-50",
+    border: "border-amber-200",
+    description: "Logged persistent afternoon fatigue. AI identified slight alignment with low active recovery rates. Recommended hydration checks and early screens-off.",
+    source: "MedHive Symptom Log",
+    severity: "moderate",
+    tags: ["Fatigue", "Symptom Tracker"],
+  },
+  {
+    id: 3,
+    date: "2026-05-28",
+    title: "Medication Adherence Check: Magnesium Glycinate",
+    category: "medication",
+    icon: "pill",
+    color: "text-tertiary",
+    bg: "bg-tertiary/10",
+    border: "border-tertiary/20",
+    description: "Successfully recorded consistent 14-day compliance. Wellness indicators report stable sleep quality scores.",
+    source: "Personal Adherence Check-in",
+    severity: "normal",
+    tags: ["Medications", "Magnesium", "Sleep"],
+  },
+  {
+    id: 4,
+    date: "2026-05-20",
+    title: "Voice Consultation: Post-Workout Recovery",
+    category: "voice",
+    icon: "mic",
+    color: "text-blue-600",
+    bg: "bg-blue-50",
+    border: "border-blue-200",
+    description: "Consulted on muscle tightness and hydration rules. Guided to perform 10 minutes of active cooling stretches and check fluid markers.",
+    source: "Voice Health Assistant Log",
+    severity: "normal",
+    tags: ["Voice Assistant", "Recovery", "Stretching"],
+  },
+  {
+    id: 5,
+    date: "2026-05-15",
+    title: "Lab Report Upload: HbA1c Glucose",
+    category: "lab",
+    icon: "glucose",
+    color: "text-amber-600",
+    bg: "bg-amber-50",
+    border: "border-amber-200",
+    description: "Glucose level returned at 5.9%. Located within the pre-diabetic target range. Lifestyle recommendations on healthy nutrition active.",
+    source: "Quest Diagnostics Sync",
+    severity: "moderate",
+    tags: ["HbA1c", "Glucose Check", "Metabolic"],
+  },
+]
+
+const categories = ["all", "symptom", "lab", "medication", "voice"] as const
+type Category = typeof categories[number]
+
+const categoryConfig: Record<Category, { label: string; icon: string }> = {
+  all: { label: "All Logs", icon: "timeline" },
+  symptom: { label: "Symptom Checks", icon: "healing" },
+  lab: { label: "Lab Reports", icon: "science" },
+  medication: { label: "Medications", icon: "pill" },
+  voice: { label: "Voice Logs", icon: "mic" },
+}
+
+const severityMap: Record<string, string> = {
+  normal: "text-tertiary",
+  moderate: "text-amber-600",
+  critical: "text-error",
+}
+
+export default function HealthTimelinePage() {
+  const [category, setCategory] = React.useState<Category>("all")
+  const [expanded, setExpanded] = React.useState<number | null>(null)
+  const [search, setSearch] = React.useState("")
+
+  const filtered = timelineEvents.filter((e) => {
+    const matchCat = category === "all" || e.category === category
+    const matchSearch = search === "" || e.title.toLowerCase().includes(search.toLowerCase()) || e.description.toLowerCase().includes(search.toLowerCase())
+    return matchCat && matchSearch
+  })
+
+  const healthScore = 84
+
+  return (
+    <div className="bg-surface text-on-surface min-h-screen flex font-sans">
+      <Sidebar />
+
+      <main className="flex-1 min-h-screen overflow-y-auto custom-scrollbar pb-20 md:pb-0">
+        {/* Header */}
+        <motion.header
+          initial={{ y: -20, opacity: 0 }}
+          animate={{ y: 0, opacity: 1 }}
+          transition={{ type: "spring" as const, stiffness: 120 }}
+          className="sticky top-0 z-40 bg-surface/90 backdrop-blur-xl px-6 py-4 border-b border-outline-variant/30 shadow-sm flex flex-col md:flex-row md:items-center md:justify-between gap-4"
+        >
+          <div>
+            <h1 className="text-xl font-bold">Personal Health Journey</h1>
+            <p className="text-xs text-on-surface-variant mt-0.5">Your complete history of assessments, lab reports, and voice summaries.</p>
+          </div>
+          <div className="relative w-full md:w-56">
+            <i className="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-on-surface-variant" style={{ fontSize: "18px" }}>search</i>
+            <input
+              value={search}
+              onChange={(e) => setSearch(e.target.value)}
+              placeholder="Search history logs..."
+              className="pl-9 pr-4 py-2 text-sm bg-surface-container-low border border-outline-variant rounded-full w-full focus:outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 transition-all"
+            />
+          </div>
+        </motion.header>
+
+        <motion.div initial="hidden" animate="visible" variants={containerVariants} className="p-6 max-w-4xl mx-auto w-full space-y-6">
+          {/* Health Score */}
+          <motion.div variants={cardVariants}>
+            <Card className="overflow-hidden border-none shadow-xl shadow-primary/10">
+              <div className="bg-gradient-to-br from-[#b20028] via-[#c0002f] to-[#8b0020] p-6 text-white">
+                <div className="flex items-center justify-between gap-6">
+                  {/* Left: Score info */}
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2 mb-2">
+                      <i className="material-symbols-outlined text-white/60" style={{ fontVariationSettings: "'FILL' 1", fontSize: "16px" }}>monitoring</i>
+                      <p className="text-white/70 text-xs font-semibold uppercase tracking-widest font-sans">Wellness Score</p>
+                    </div>
+                    <div className="flex items-baseline gap-2 mb-3">
+                      <span className="text-6xl font-black">{healthScore}</span>
+                      <span className="text-white/60 text-xl font-light">/100</span>
+                      <span className="ml-2 flex items-center gap-1 text-xs font-bold bg-white/15 px-2.5 py-1 rounded-full">
+                        <i className="material-symbols-outlined" style={{ fontVariationSettings: "'FILL' 1", fontSize: "12px" }}>trending_up</i>
+                        Improving
+                      </span>
+                    </div>
+                    <p className="text-xs text-white/75 leading-relaxed font-semibold">
+                      Calculated across your wellness reviews, symptom checks, and diagnostic uploads.
+                    </p>
+                  </div>
+
+                  {/* Right: SVG ring */}
+                  <div className="relative w-28 h-28 shrink-0">
+                    <svg viewBox="0 0 80 80" className="w-full h-full -rotate-90">
+                      <circle cx="40" cy="40" r="34" fill="none" stroke="rgba(255,255,255,0.15)" strokeWidth="7" />
+                      <motion.circle
+                        cx="40" cy="40" r="34" fill="none" stroke="white" strokeWidth="7"
+                        strokeLinecap="round"
+                        strokeDasharray={213.6}
+                        initial={{ strokeDashoffset: 213.6 }}
+                        animate={{ strokeDashoffset: 213.6 * (1 - healthScore / 100) }}
+                        transition={{ duration: 1.4, type: "spring", stiffness: 50, delay: 0.4 }}
+                      />
+                    </svg>
+                    <div className="absolute inset-0 flex flex-col items-center justify-center">
+                      <i className="material-symbols-outlined text-white" style={{ fontVariationSettings: "'FILL' 1", fontSize: "26px" }}>favorite</i>
+                      <span className="text-xs text-white/70 font-medium mt-0.5">Optimal</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Stats row */}
+                <div className="grid grid-cols-3 gap-3 mt-5 pt-5 border-t border-white/15">
+                  {[
+                    { label: "Total Logs", value: timelineEvents.length, icon: "event_note" },
+                    { label: "Lab Summaries", value: timelineEvents.filter(e => e.category === "lab").length, icon: "science" },
+                    { label: "Symptom Checks", value: timelineEvents.filter(e => e.category === "symptom").length, icon: "healing" },
+                  ].map((s) => (
+                    <div key={s.label} className="text-center">
+                      <i className="material-symbols-outlined text-white/50 mb-1" style={{ fontSize: "16px" }}>{s.icon}</i>
+                      <p className="text-2xl font-bold">{s.value}</p>
+                      <p className="text-white/60 text-[11px] font-medium mt-0.5">{s.label}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </Card>
+          </motion.div>
+
+          {/* Category Filters */}
+          <motion.div variants={cardVariants} className="flex gap-2 flex-wrap">
+            {categories.map((c) => (
+              <button
+                key={c}
+                onClick={() => setCategory(c)}
+                className={`flex items-center gap-1.5 px-4 py-1.5 rounded-full text-xs font-bold transition-all border cursor-pointer ${
+                  category === c
+                    ? "bg-primary text-white border-primary shadow-md shadow-primary/25"
+                    : "bg-white border-outline-variant text-on-surface-variant hover:border-primary hover:text-primary"
+                }`}
+              >
+                <i className="material-symbols-outlined" style={{ fontSize: "14px" }}>{categoryConfig[c].icon}</i>
+                {categoryConfig[c].label}
+              </button>
+            ))}
+          </motion.div>
+
+          {/* Timeline */}
+          <motion.div variants={cardVariants} className="relative">
+            {/* Vertical line */}
+            <div
+              className="absolute top-5 bottom-5 w-0.5 bg-gradient-to-b from-primary/50 via-outline-variant/60 to-transparent"
+              style={{ left: "19px" }}
+            />
+
+            <div className="space-y-3 text-xs">
+              {filtered.map((event, idx) => (
+                <motion.div
+                  key={event.id}
+                  initial={{ opacity: 0, x: -16 }}
+                  animate={{ opacity: 1, x: 0 }}
+                  transition={{ delay: idx * 0.05, type: "spring" as const, stiffness: 120, damping: 18 }}
+                  className="flex gap-4 items-start"
+                >
+                  {/* Timeline icon dot */}
+                  <div className={`w-10 h-10 rounded-2xl ${event.bg} flex items-center justify-center border ${event.border} shadow-sm shrink-0 mt-0.5`}>
+                    <i className={`material-symbols-outlined ${event.color}`} style={{ fontVariationSettings: "'FILL' 1", fontSize: "18px" }}>{event.icon}</i>
+                  </div>
+
+                  {/* Event card */}
+                  <div className="flex-1 min-w-0">
+                    <Card
+                      className={`cursor-pointer transition-all duration-200 hover:shadow-md border-l-[3px] ${event.border} hover:-translate-y-0.5`}
+                      onClick={() => setExpanded(expanded === event.id ? null : event.id)}
+                    >
+                      <div className="p-4">
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <h3 className="font-bold text-sm text-on-surface leading-tight">{event.title}</h3>
+                              {event.severity === "moderate" && (
+                                <span className="inline-flex items-center gap-1 text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full border border-amber-200 shrink-0">
+                                  <span className="w-1.5 h-1.5 rounded-full bg-amber-500" />
+                                  Review suggested
+                                </span>
+                              )}
+                            </div>
+                            <p className="text-[10px] text-on-surface-variant mt-1 font-semibold">{event.source}</p>
+                          </div>
+                          <div className="flex items-center gap-2 shrink-0">
+                            <span className="text-[10px] text-on-surface-variant font-medium whitespace-nowrap">
+                              {new Date(event.date).toLocaleDateString("en-US", { month: "short", day: "numeric" })}
+                            </span>
+                            <i
+                              className="material-symbols-outlined text-on-surface-variant/60 transition-transform duration-300"
+                              style={{
+                                fontSize: "18px",
+                                transform: expanded === event.id ? "rotate(180deg)" : "rotate(0deg)",
+                              }}
+                            >
+                              expand_more
+                            </i>
+                          </div>
+                        </div>
+
+                        <AnimatePresence>
+                          {expanded === event.id && (
+                            <motion.div
+                              initial={{ height: 0, opacity: 0 }}
+                              animate={{ height: "auto", opacity: 1 }}
+                              exit={{ height: 0, opacity: 0 }}
+                              transition={{ type: "spring" as const, stiffness: 300, damping: 30 }}
+                              className="overflow-hidden"
+                            >
+                              <div className="pt-3 mt-3 border-t border-outline-variant/30 text-xs">
+                                <p className="text-on-surface-variant leading-relaxed mb-3">
+                                  {event.description}
+                                </p>
+                                <div className="flex gap-1.5 flex-wrap mb-3">
+                                  {event.tags.map((tag) => (
+                                    <span key={tag} className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-surface-container-highest text-on-surface-variant">
+                                      #{tag}
+                                    </span>
+                                  ))}
+                                </div>
+                                <div className="flex items-center gap-4">
+                                  <button className="text-[10px] text-primary font-bold hover:underline flex items-center gap-1 transition-colors cursor-pointer">
+                                    <i className="material-symbols-outlined" style={{ fontSize: "14px" }}>chat_bubble</i>
+                                    Ask AI Questions
+                                  </button>
+                                  <span className="text-outline-variant">·</span>
+                                  <button className="text-[10px] text-on-surface-variant font-medium hover:text-primary transition-colors flex items-center gap-1 cursor-pointer">
+                                    <i className="material-symbols-outlined" style={{ fontSize: "14px" }}>download</i>
+                                    Download Summary
+                                  </button>
+                                </div>
+                              </div>
+                            </motion.div>
+                          )}
+                        </AnimatePresence>
+                      </div>
+                    </Card>
+                  </div>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        </motion.div>
+      </main>
+
+      <MobileBottomNav />
+    </div>
+  )
+}

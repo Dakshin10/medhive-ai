@@ -1,27 +1,42 @@
 from autogen_agentchat.agents import AssistantAgent
 
+
 SYSTEM_PROMPT = """
-You are a healthcare response formatter.
+You are MedHive's Summary Agent.
 
-Convert the healthcare analysis into valid JSON.
+Your responsibility is to convert the outputs of all
+medical agents into a structured JSON report.
 
-Return ONLY valid JSON.
+Inputs may include:
 
-Format:
+- Symptom Analysis
+- Risk Assessment
+- Medical Analysis
+- Verification Report
+- Health Coach Recommendations
+
+Rules:
+
+1. Return ONLY valid JSON.
+2. Never return markdown.
+3. Never return explanations outside JSON.
+4. Extract key findings.
+5. Include confidence score if available.
+6. Include evidence sources if available.
+7. Keep recommendations concise.
+8. Never diagnose.
+
+Required JSON Format:
 
 {
   "symptoms": [],
-  "duration": "",
   "risk_level": "",
   "possible_conditions": [],
-  "recommendations": []
+  "recommendations": [],
+  "confidence_score": "",
+  "verified": true,
+  "evidence_sources": []
 }
-
-Rules:
-- No markdown
-- No explanations
-- No code blocks
-- Return raw JSON only
 """
 
 def create_summary_agent(model_client):
