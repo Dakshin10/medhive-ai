@@ -5,6 +5,7 @@ import { Sidebar, MobileBottomNav } from "@/components/Sidebar"
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
+import { API_URL } from "@/config"
 
 // Motion Variants
 const containerVariants = {
@@ -67,7 +68,7 @@ export default function DashboardPage() {
     formData.append("file", file)
 
     try {
-      const response = await fetch("http://localhost:8000/analyze-report", {
+      const response = await fetch(`${API_URL}/analyze-report`, {
         method: "POST",
         body: formData,
       })
@@ -76,7 +77,7 @@ export default function DashboardPage() {
         const data = await response.json()
         setReportResult(data.analysis || "Analysis completed.")
       } else {
-        setReportResult("Failed to analyze the report. Make sure your local MedHive AI backend is running on port 8000.")
+        setReportResult("Failed to analyze the report. Make sure your MedHive AI backend is running.")
       }
     } catch (err) {
       console.error(err)

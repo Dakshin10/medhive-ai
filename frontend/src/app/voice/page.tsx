@@ -4,6 +4,7 @@ import * as React from "react"
 import { Sidebar, MobileBottomNav } from "@/components/Sidebar"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
+import { API_URL } from "@/config"
 
 interface VoiceSession {
   id: number
@@ -70,7 +71,7 @@ export default function VoicePage() {
     formData.append("audio", blob, "voice_input.webm")
 
     try {
-      const response = await fetch("http://localhost:8000/voice/voice-assistant", {
+      const response = await fetch(`${API_URL}/voice/voice-assistant`, {
         method: "POST",
         body: formData,
       })
@@ -88,7 +89,7 @@ export default function VoicePage() {
         
         if (data.audio_file) {
           setStatus("speaking")
-          const audioUrl = `http://localhost:8000/outputs/${data.audio_file}`
+          const audioUrl = `${API_URL}/outputs/${data.audio_file}`
           if (audioPlayerRef.current) {
             audioPlayerRef.current.src = audioUrl
             audioPlayerRef.current.play()

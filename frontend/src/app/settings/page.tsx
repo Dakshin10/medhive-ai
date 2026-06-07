@@ -120,6 +120,16 @@ export default function SettingsPage() {
                     {s.label}
                   </button>
                 ))}
+                <div className="border-t border-outline-variant/10 my-2 pt-2" />
+                <a
+                  href="https://github.com/Dakshin10/medhive-ai"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm font-medium text-on-surface-variant hover:bg-surface-container transition-all cursor-pointer"
+                >
+                  <i className="material-symbols-outlined shrink-0" style={{ fontSize: "18px" }}>code</i>
+                  GitHub Repository
+                </a>
               </Card>
             </motion.div>
 
@@ -139,6 +149,15 @@ export default function SettingsPage() {
                   {s.label}
                 </button>
               ))}
+              <a
+                href="https://github.com/Dakshin10/medhive-ai"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-bold whitespace-nowrap transition-all border shrink-0 cursor-pointer bg-white border-outline-variant text-on-surface-variant hover:text-primary hover:border-primary"
+              >
+                <i className="material-symbols-outlined" style={{ fontSize: "14px" }}>code</i>
+                GitHub
+              </a>
             </div>
 
             {/* Content */}
@@ -182,6 +201,31 @@ export default function SettingsPage() {
                               </div>
                             </div>
                           ))}
+                        </div>
+                      </Card>
+                    </motion.div>
+
+                    <motion.div variants={cardVariants}>
+                      <Card className="p-6 bg-gradient-to-r from-primary/5 to-transparent border border-outline-variant/30 grid grid-cols-1 md:grid-cols-4 gap-4 items-start md:items-center">
+                        <div className="space-y-1 md:col-span-3 w-full">
+                          <h3 className="font-bold text-sm text-on-surface flex items-center gap-2">
+                            <i className="material-symbols-outlined text-primary" style={{ fontSize: "18px" }}>code</i>
+                            Project Information
+                          </h3>
+                          <p className="text-xs text-on-surface-variant leading-relaxed font-medium max-w-2xl">
+                            MedHive AI is a production-grade Multi-Agent Healthcare Copilot. Explore the codebase, review issues, or star the project on GitHub.
+                          </p>
+                        </div>
+                        <div className="md:justify-self-end flex">
+                          <a
+                            href="https://github.com/Dakshin10/medhive-ai"
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="bg-primary text-white font-bold px-5 py-2.5 rounded-xl text-xs hover:bg-primary-container shrink-0 transition-colors flex items-center gap-1.5 shadow-md shadow-primary/20 cursor-pointer"
+                          >
+                            <i className="material-symbols-outlined" style={{ fontSize: "16px" }}>star</i>
+                            View on GitHub
+                          </a>
                         </div>
                       </Card>
                     </motion.div>

@@ -6,6 +6,7 @@ import { Sidebar, MobileBottomNav } from "@/components/Sidebar"
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
+import { API_URL } from "@/config"
 
 interface Message {
   sender: "user" | "ai"
@@ -67,6 +68,100 @@ export default function ChatPage() {
     scrollToBottom()
   }, [messages, loading])
 
+  React.useEffect(() => {
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search)
+      const q = params.get("q")
+      if (q) {
+        const triggerQuery = async () => {
+          setMessages((prev) => [
+            ...prev,
+            {
+              sender: "user",
+              text: q,
+              time: "Just now",
+            },
+          ])
+          setLoading(true)
+          try {
+            const response = await fetch(`${API_URL}/analyze`, {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ message: q }),
+            })
+
+            if (response.ok) {
+              const data = await response.json()
+              let aiText = "Analysis complete."
+              let assessment = undefined
+
+              if (data.status === "SUCCESS" && data.assessment) {
+                assessment = data.assessment
+                aiText = `Here is my assessment of your health queries. Risk profile is evaluated as ${assessment.risk_level}. Check details below:`
+                if (assessment.risk_level) {
+                  const level = assessment.risk_level.toLowerCase()
+                  if (level.includes("high") || level.includes("critical")) {
+                    setRiskLevel("High")
+                    setHealthScore(72)
+                    setAlerts((prev) => [
+                      { id: Date.now(), type: "warning", message: "Advisory: Consider sharing these symptoms with a healthcare professional." },
+                      ...prev,
+                    ])
+                  } else if (level.includes("low")) {
+                    setRiskLevel("Low")
+                  }
+                }
+              } else if (data.status === "EMERGENCY" && data.assessment) {
+                aiText = `⚠️ EMERGENCY DETECTED! Reason: ${data.assessment.reason}. Action Recommendation: ${data.assessment.action}`
+                setRiskLevel("High")
+                setHealthScore(60)
+                setAlerts((prev) => [
+                  { id: Date.now(), type: "warning", message: `EMERGENCY ALERT: ${data.assessment.reason}` },
+                  ...prev,
+                ])
+              } else if (data.raw_response) {
+                aiText = data.raw_response
+              }
+
+              setMessages((prev) => [
+                ...prev,
+                {
+                  sender: "ai",
+                  text: aiText,
+                  time: "Just now",
+                  assessment: assessment,
+                },
+              ])
+            } else {
+              setMessages((prev) => [
+                ...prev,
+                {
+                  sender: "ai",
+                  text: "I encountered an error. Please verify your MedHive AI backend is running.",
+                  time: "Just now",
+                },
+              ])
+            }
+          } catch (err) {
+            console.error(err)
+            setMessages((prev) => [
+              ...prev,
+              {
+                sender: "ai",
+                text: "I could not connect to the backend server. Using local wellness heuristics: The symptoms described appear manageable. Try resting, logging your hydration, and check in if fatigue persists.",
+                time: "Just now",
+              },
+            ])
+          } finally {
+            setLoading(false)
+          }
+        }
+        triggerQuery()
+        window.history.replaceState({}, document.title, window.location.pathname)
+      }
+    }
+  }, [])
+
   // Suggested Actions click handlers
   const handleQuickAction = (actionType: string) => {
     if (actionType === "symptoms") {
@@ -124,7 +219,7 @@ export default function ChatPage() {
       formData.append("file", attachedFile as File)
 
       try {
-        const response = await fetch("http://localhost:8000/analyze-report", {
+        const response = await fetch(`${API_URL}/analyze-report`, {
           method: "POST",
           body: formData,
         })
@@ -175,7 +270,7 @@ export default function ChatPage() {
     }
 
     try {
-      const response = await fetch("http://localhost:8000/analyze", {
+      const response = await fetch(`${API_URL}/analyze`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ message: userMsg }),

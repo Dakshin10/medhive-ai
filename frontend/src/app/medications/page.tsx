@@ -5,6 +5,7 @@ import { Sidebar, MobileBottomNav } from "@/components/Sidebar"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 import { motion, AnimatePresence } from "framer-motion"
+import { API_URL } from "@/config"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -60,7 +61,7 @@ export default function MedicationsPage() {
   } | null>(null)
   const [checking, setChecking] = React.useState(false)
 
-  const handleAddMed = (e: React.FormEvent) => {
+  const handleAddMed = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!newMed.trim()) return
 
@@ -68,23 +69,45 @@ export default function MedicationsPage() {
     setChecking(true)
     setInteractionResult(null)
 
-    setTimeout(() => {
-      // Look up interactions
-      const key = name.toLowerCase()
-      const rule = interactionDatabase[key] || {
-        risk: "None",
-        alert: "No major interactions detected with your current health routine.",
-        recommendation: "Ensure you take standard recommended dosages and log any new symptoms."
-      }
-
-      setInteractionResult({
-        medName: name,
-        risk: rule.risk,
-        alert: rule.alert,
-        recommendation: rule.recommendation
+    try {
+      const activeMedNames = activeMeds.map((med) => med.name)
+      const res = await fetch(`${API_URL}/medications/check`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          medication: name,
+          active_medications: activeMedNames,
+        }),
       })
 
-      // Add to list if it's safe or moderately safe
+      if (res.ok) {
+        const data = await res.json()
+        setInteractionResult({
+          medName: name,
+          risk: data.risk,
+          alert: data.alert,
+          recommendation: data.recommendation,
+        })
+      } else {
+        setInteractionResult({
+          medName: name,
+          risk: "None",
+          alert: "Could not analyze interactions. Server returned an error.",
+          recommendation: "Ensure MedHive AI backend is running and healthy.",
+        })
+      }
+    } catch (err) {
+      console.error(err)
+      setInteractionResult({
+        medName: name,
+        risk: "None",
+        alert: "Could not reach the medication check server. Please verify the MedHive backend is active.",
+        recommendation: "Please ensure the backend server is running.",
+      })
+    } finally {
+      // Add to list
       setActiveMeds((prev) => [
         { name, dosage: newDosage, type: "Daily", purpose: "General Wellness" },
         ...prev,
@@ -93,7 +116,7 @@ export default function MedicationsPage() {
       setNewMed("")
       setNewDosage("1 Tablet")
       setChecking(false)
-    }, 1200)
+    }
   }
 
   const handleRemoveMed = (index: number) => {

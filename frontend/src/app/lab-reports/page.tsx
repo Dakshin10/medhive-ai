@@ -4,6 +4,7 @@ import * as React from "react"
 import { Sidebar, MobileBottomNav } from "@/components/Sidebar"
 import { Card } from "@/components/ui/card"
 import { motion, AnimatePresence } from "framer-motion"
+import { API_URL } from "@/config"
 
 const containerVariants = {
   hidden: { opacity: 0 },
@@ -262,12 +263,12 @@ export default function LabReportsPage() {
     const formData = new FormData()
     formData.append("file", file)
     try {
-      const res = await fetch("http://localhost:8000/analyze-report", { method: "POST", body: formData })
+      const res = await fetch(`${API_URL}/analyze-report`, { method: "POST", body: formData })
       if (res.ok) {
         const data = await res.json()
         setAnalysis(data.analysis || "Analysis completed successfully.")
       } else {
-        setAnalysis("Unable to connect with AI analyzer. Please check if MedHive backend is active on port 8000.")
+        setAnalysis(`Unable to connect with AI analyzer. Please check if MedHive backend is active.`)
       }
     } catch {
       setAnalysis("Could not reach the wellness analyzer. Simulating patient breakdown: The uploaded file has been parsed. LDL is within optimal targets (95 mg/dL) and Vitamin D is slightly low at 28 ng/mL. Recommend increasing daily sunlight exposure and consider supplementation.")
